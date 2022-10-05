@@ -53,7 +53,7 @@ best <- function(state, outcome){
                                           # to the minimized outcome related hospital
    best_clinic <- df_area$"Hospital Name"[pos]
   }
-  mini
+  best_clinic
 }
 
 best(state = "OR", outcome = "Heart Attack")
