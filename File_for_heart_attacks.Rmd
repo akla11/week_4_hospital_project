@@ -28,12 +28,28 @@ Write a function that finds the "best" hospital in terms of
 ```{r}
 best <- function(state, outcome){
   # maybe use here the read in function
+  state_names <- df_heart_deaths %>%
+  select(State) %>% 
+  distinct() %>%
+  unlist(use.names = F) %>%
+  as.vector()
+  
+  
+  
   for (s in state){
+    if(s %in% state_names == F) {
+      stop("invalid state (pls check again)")
+    }
   df_area <- df_heart_deaths %>%              # uses filter in a for loop
       filter(State == s)                      # to get just data for the 
   }                                           # argument state 
-   
+  
+  outcome_names <- c("Heart Attack", "Heart Failure", "Pneumonia") 
+  
   for (o in outcome) {
+    if(o %in% outcome_names == F) {
+      stop("invalid outcome (pls check again)")
+    }
   outc <-  paste("Hospital 30-Day Death (Mortality) Rates from", o, sep = " ")
                                     # using paste to get col name from argument
   df_area <- df_area %>%
@@ -56,7 +72,7 @@ best <- function(state, outcome){
   best_clinic
 }
 
-best(state = "OR", outcome = "Heart Attack")
+best(state = "MD", outcome = "Heart Attack")
 
 ```
 
@@ -74,5 +90,15 @@ state_names
 
 best(state = "RI", outcome = "Heart Failure")
 
+top <- function(x = is.character()) {
+if(x %in% state_names == T){
+  1+1
+}
+else{
+  2+2
+}
+}
+
+top("O")
 
 ```
