@@ -1,0 +1,78 @@
+---
+title: "Nr1_Visualize_Heart_Attacks"
+author: "klabbi123"
+date: '2022-10-04'
+output: html_document
+---
+Aufgabe 1 
+```{r setup, include=FALSE}
+#remove(list = ls())
+df_heart_deaths <- read_csv("C:/Users/adria/Desktop/Programmieren/R_Coursera/week_4_project/data/outcome-of-care-measures.csv")
+
+head(df_heart_deaths)
+names(df_heart_deaths)
+
+library(tidyverse)
+library(ggplot2)
+
+df_heart_deaths %>%
+  ggplot(aes(x = as.numeric(as.character(`Hospital 30-Day Death (Mortality) Rates from Heart Attack`)))) +
+  geom_histogram() +
+  labs(x = "30-Tage Mortalitätsrate durch Herzinfarkte",
+       y = "Häufigkeit")
+
+```
+
+Aufgabe 2 
+Write a function that finds the "best" hospital in terms of 
+```{r}
+best <- function(state, outcome){
+  # maybe use here the read in function
+  for (s in state){
+  df_area <- df_heart_deaths %>%              # uses filter in a for loop
+      filter(State == s)                      # to get just data for the 
+  }                                           # argument state 
+   
+  for (o in outcome) {
+  outc <-  paste("Hospital 30-Day Death (Mortality) Rates from", o, sep = " ")
+                                    # using paste to get col name from argument
+  df_area <- df_area %>%
+    select(outc, "Hospital Name")          # using select to have a nice time 
+       
+                                       # just handling with relevant cols
+   rate_vec <- unlist(df_area[,1], use.names = F)    # must unlist outc bc of struggle w/ mutate
+    df_area[,1] <- as.numeric(rate_vec)
+   df_area <- df_area %>% 
+        drop_na()
+   
+   mini <- min(df_area[,1])
+                               # so get a vector to calculate the minimum from
+   
+  pos <- which(df_area[,1] == mini)   # have to find of the index of min element of the vector
+                                          # for an indize to search in the df for getting the
+                                          # to the minimized outcome related hospital
+   best_clinic <- df_area$"Hospital Name"[pos]
+  }
+  mini
+}
+
+best(state = "OR", outcome = "Heart Attack")
+
+```
+
+
+```{r}
+df_heart_deaths$`Hospital Name`
+
+state_names <- df_heart_deaths %>%
+  select(State) %>% 
+  distinct() %>%
+  unlist(use.names = F) %>%
+  as.vector()
+
+state_names
+
+best(state = "RI", outcome = "Heart Failure")
+
+
+```
