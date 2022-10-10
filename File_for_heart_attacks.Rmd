@@ -7,6 +7,8 @@ output: html_document
 Aufgabe 1 
 ```{r setup, include=FALSE}
 #remove(list = ls())
+library(tidyverse)
+library(ggplot2)
 df_heart_deaths <- read_csv("C:/Users/adria/Desktop/Programmieren/R_Coursera/week_4_project/data/outcome-of-care-measures.csv")
 
 head(df_heart_deaths)
@@ -24,7 +26,7 @@ df_heart_deaths %>%
 ```
 
 Aufgabe 2 
-Write a function that finds the "best" hospital in terms of 
+Write a function that finds the "best" hospital in terms of certain outcome for each state
 ```{r}
 best <- function(state, outcome){
   # maybe use here the read in function
@@ -72,33 +74,188 @@ best <- function(state, outcome){
   best_clinic
 }
 
-best(state = "MD", outcome = "Heart Attack")
+best(state = "TN", outcome = "Heart Attack")
+
+best("SC", "Heart Attack")
+best("NY", "Pneumonia")
+best("AK", "Pneumonia")
 
 ```
 
+Aufgabe 3
 
+Hospital that has a specified rank in a specific state
 ```{r}
-df_heart_deaths$`Hospital Name`
-
+rankhospital <- function(state, outcome, num) {
+  df_heart_deaths <- 
+  read_csv("C:/Users/adria/Desktop/Programmieren/R_Coursera/week_4_project/data/outcome-of-care-measures.csv")         
+# make a vector containing all represented states, to make a condition
 state_names <- df_heart_deaths %>%
   select(State) %>% 
   distinct() %>%
   unlist(use.names = F) %>%
   as.vector()
+# making a loop with stop to recognize if state-argument is correct 
+# and subset for the specified state
+  for (s in state){
+    if(s %in% state_names == F) {
+      stop("invalid state (pls check again)")
+    }
+  df_area <- df_heart_deaths %>%              # uses filter in a for loop
+      filter(State == s)                      # to get just data for the 
+  }    
 
-state_names
+outcome_names <- c("Heart Attack", "Heart Failure", "Pneumonia") 
+      
+        
+   for (o in outcome) {
+    if(o %in% outcome_names == F) {
+      stop("invalid outcome (pls check again)")
+    }
+  outc <-  paste("Hospital 30-Day Death (Mortality) Rates from", o, sep = " ")
+        
+   }
+outc  
 
-best(state = "RI", outcome = "Heart Failure")
 
-top <- function(x = is.character()) {
-if(x %in% state_names == T){
-  1+1
+
+
+df_area <- df_area %>%
+    select(outc, "Hospital Name")          # using select to have a nice time 
+       
+                                       # just handling with relevant cols
+   rate_vec <- unlist(df_area[,1], use.names = F)    # must unlist outc bc of struggle w/ mutate
+  df_area[,1] <- as.numeric(rate_vec)
+   df_area <- df_area %>% 
+                    drop_na()
+   
+   names(df_area)[1] <- "outc"
+   
+  df_sorted <-  df_area %>%
+                  arrange(`Hospital Name`) %>%
+                  arrange(outc)
+  
+ df_ranking <-  df_sorted %>%
+                  mutate(ranking = 1:length(outc))
+      
+if(num > length(df_sorted$outc)) {
+  stop("NA")
+} 
+ 
+ ranked_hospital <- df_ranking %>%
+                     filter(ranking == num) %>%
+                     select("Hospital Name")
+ 
+ ranked_hospital
 }
-else{
-  2+2
-}
+
+rankhospital(state ="NY" , outcome = "Pneumonia", num = 3)
+
+rankhospital("NC", "Heart Attack", 83)
+
+rankhospital("WA", "Heart Attack", 7)
+
+rankhospital("TX", "Pneumonia", 10)
+
+rankhospital("NY", "Heart Attack", 7)
+
+as.character(subset(df_heart_deaths, State == "HI")$"Hospital Name")
+```
+Aufgabe 4
+Names of hospitals for all states with the same rank for a specified outcome
+```{r}
+remove(list = ls())
+library(tidyverse)
+
+
+rankall <- function(outcome, num) {
+df_heart_deaths <- 
+  read_csv("C:/Users/adria/Desktop/Programmieren/R_Coursera/week_4_project/data/outcome-of-care-measures.csv")  
+
+state_names <- df_heart_deaths %>%
+                   select(State) %>% 
+                   distinct() %>%
+                   unlist(use.names = F) %>%
+                   as.vector()
+
+ranklist <- tibble(state = state_names,
+                   ranked_hospital = vector(mode = "character", 
+                                            length = length(state)))
+
+
+  # initilize data frame
+
+
+
+
+outcome_names <- c("Heart Attack", "Heart Failure", "Pneumonia") 
+      
+if(outcome %in% outcome_names == F) {
+      stop("invalid outcome (pls check again)")
 }
 
-top("O")
+outc <-  paste("Hospital 30-Day Death (Mortality) Rates from", outcome, sep = " ")
+   
+
+
+for(s in state_names) {
+  
+df_area <- df_heart_deaths[df_heart_deaths$State == s,]   # filtering in a loop to make computation for each state
+      
+ df_area %>%            
+   select(outc, "Hospital Name", State)     #subsetting to have a tinier df  
+       
+                              
+rate_vec <- unlist(df_area[,1], use.names = F)    # must unlist outc-col for transforming data format 
+ 
+df_area[,1] <- as.numeric(rate_vec)
+   
+names(df_area)[1] <- "outc"           # set col name for debugging
+
+
+df_sorted <-  df_area %>%                    # sort cols first alphabet than by outcome increasingly
+                  arrange(`Hospital Name`) %>%        # to introduce a col with ranknumbers 
+                   arrange(outc)
+  
+ df_ranking <-  df_sorted %>%                   
+                  mutate(ranking = 1:length(outc))
+ 
+   pos <- which(state_names == s)        # set index-position of state names to put in it to the initialized df 
+   
+   if(num == "worst") {                 
+     numa <- length(df_ranking$outc)
+     ranklist[pos, 2] <- df_ranking %>%
+                           filter(ranking == numa) %>%
+                             select("Hospital Name")
+   } 
+   
+    else if(num > length(df_ranking$outc)) { 
+     
+     ranklist[pos,2] <- NA}
+    
+      else{
+  
+     ranklist[pos,2] <- df_ranking %>%
+                        filter(ranking == num) %>%
+                          select("Hospital Name")
+      }
+    }
+
+ranklist
+}
+
+rankall("Heart Failure", "worst")
+
+
+  
+```
+
+
+```{r}
+ df_heart_deaths <- read_csv("C:/Users/adria/Desktop/Programmieren/R_Coursera/week_4_project/data/outcome-of-care-measures.csv")
+
+df_heart_deaths <- df_heart_deaths %>%
+  filter(State == "GU")
 
 ```
+
