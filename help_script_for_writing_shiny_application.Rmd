@@ -1,0 +1,43 @@
+---
+title: "Help_script_for_plots"
+author: "klabbi123"
+date: '2022-10-17'
+output: html_document
+---
+Datensatz vorbereiten 
+```{r setup, include=FALSE}
+df <- mtcars %>%
+       pivot_longer(cols = categorical_variables,
+                names_to = "categorical_variable",
+                values_to = "categorical_values")
+df <- df %>%
+       pivot_longer(cols = c(mpg, disp, hp, drat, wt, qsec),
+                    names_to = "continuous_variable",
+                    values_to = "continuous_values")
+```
+Histogram plotten für die kontinuierlichen Variablen
+```{r}
+df %>%
+  ggplot(aes(x = continuous_values)) +
+   geom_histogram() +
+   facet_wrap(~continuous_variable,
+              scales = "free")
+
+?facet_wrap()
+```
+Box-Plot für Verteilung der kontinuierlichen Variablen aufgeteilt nach den
+kategorialen Variablen 
+```{r}
+df <- df %>%
+  mutate(categorical_levels = 
+           paste(categorical_variable,categorical_values, sep = " = ")) 
+
+df %>%
+  ggplot(aes(y = continuous_values, x = continuous_variable)) +
+  geom_boxplot() +
+  facet_wrap(~categorical_levels, scales = "free")#+
+  #facet_wrap(categorical_variable~continuous_variable,
+            # scales = "free")
+  
+```
+
